@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStore</title>
+  <link rel="stylesheet" href="smartstore.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav>
+  <a class="nav-logo" onclick="showPage('home')" href="#">
+    <span class="logo-icon">🛍</span> SmartStore
+  </a>
+
+  <div class="nav-links">
+    <a class="nav-link active" data-page="home"   onclick="showPage('home')">Home</a>
+    <a class="nav-link"        data-page="orders" onclick="showPage('orders')">Orders</a>
+    <a class="nav-link"        data-page="chat"   onclick="showPage('chat')">Support</a>
+    <a class="nav-link admin-only hidden" data-page="admin" onclick="showPage('admin')">Admin</a>
+  </div>
+
+  <div class="nav-right">
+
+    <!-- NOT logged in -->
+    <div id="nav-auth">
+      <button class="btn btn-outline btn-sm" onclick="showAuth('register')">Sign Up</button>
+      <button class="btn btn-primary btn-sm" onclick="showAuth('login')">Login</button>
+    </div>
+
+    <!-- Logged in (hidden until setUser() is called) -->
+    <div id="nav-user" class="hidden" style="display:none;align-items:center;gap:10px">
+
+      <button class="cart-btn" onclick="toggleCart()">
+        🛒 <span class="cart-btn-text">Cart</span>
+        <span class="cart-count" id="cart-count" style="display:none">0</span>
+      </button>
+
+      <!-- Avatar + Dropdown -->
+      <div id="profile-avatar-wrap" style="position:relative;display:inline-flex;align-items:center;">
+
+        <button class="nav-avatar" id="nav-avatar" onclick="toggleProfileDropdown()">?</button>
+
+        <div class="profile-dropdown" id="profile-dropdown">
+
+          <!-- Header -->
+          <div style="display:flex;flex-direction:row;align-items:center;gap:12px;padding:18px 16px;background:linear-gradient(135deg,#E8401C,#ff7043);width:100%;">
+            <div id="pd-avatar-lg" style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.3);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</div>
+            <div style="flex:1;min-width:0;">
+              <div id="pd-name"  style="font-size:15px;font-weight:700;color:white;">Guest</div>
+              <div id="pd-email" style="font-size:12px;opacity:0.85;color:white;word-break:break-all;"></div>
+              <div style="font-size:11px;margin-top:5px;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:20px;display:inline-block;color:white;">⭐ Regular Customer</div>
+            </div>
+          </div>
+
+          <!-- Account Setup -->
+          <div style="padding:6px 0;">
+  <div style="font-size:10px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:.5px;padding:4px 16px 2px;">Account Setup</div>
+
+  <button class="pd-item" onclick="openSetupModal('address')">
+    <div class="pd-item-icon">📍</div>
+    <div class="pd-item-text">
+      <div class="pd-label">Delivery Address</div>
+      <div class="pd-sub" id="pd-address-sub" style="color:#bbb;font-style:italic">Tap to set address</div>
+    </div>
+    <span class="pd-arrow">›</span>
+  </button>
+
+  <button class="pd-item" onclick="openSetupModal('payment')">
+    <div class="pd-item-icon">💳</div>
+    <div class="pd-item-text">
+      <div class="pd-label">Payment Method</div>
+      <div class="pd-sub" id="pd-payment-sub" style="color:#bbb;font-style:italic">Tap to add payment</div>
+    </div>
+    <span class="pd-arrow">›</span>
+  </button>
+
+  <button class="pd-item" onclick="openSetupModal('contact')">
+    <div class="pd-item-icon">👤</div>
+    <div class="pd-item-text">
+      <div class="pd-label">Contact Information</div>
+      <div class="pd-sub" id="pd-contact-sub" style="color:#bbb;font-style:italic">Tap to add contact</div>
+    </div>
+    <span class="pd-arrow">›</span>
+  </button>
+</div>
+          <!-- Activity -->
+          <div style="padding:6px 0;">
+            <button class="pd-item" onclick="showPage('orders');toggleProfileDropdown()">
+              <div class="pd-item-icon">📦</div>
+              <div class="pd-item-text"><div class="pd-label">My Orders</div></div>
+              <span class="pd-arrow">›</span>
+            </button>
+            <button class="pd-item">
+              <div class="pd-item-icon">🔔</div>
+              <div class="pd-item-text"><div class="pd-label">Notifications</div></div>
+              <span class="pd-arrow">›</span>
+            </button>
+          </div>
+
+          <div class="pd-divider"></div>
+
+          <!-- Logout -->
+          <div style="padding:6px 0;">
+            <button class="pd-item pd-logout" onclick="logout()">
+              <div class="pd-item-icon">🚪</div>
+              <div class="pd-item-text"><div class="pd-label" style="color:#f8e8e8;">Log out</div></div>
+            </button>
+          </div>
+
+        </div><!-- /profile-dropdown -->
+      </div><!-- /profile-avatar-wrap -->
+    </div><!-- /nav-user -->
+  </div><!-- /nav-right -->
+</nav>
+
+<!-- ============================================================
+     BOTTOM NAV — mobile only
+     ============================================================ -->
+<div class="bottom-nav">
+  <a class="bottom-nav-item active" data-page="home"   onclick="showPage('home')">
+    <span class="bnav-icon">🏠</span> Home
+  </a>
+  <a class="bottom-nav-item" data-page="orders" onclick="showPage('orders')">
+    <span class="bnav-icon">📦</span> Orders
+  </a>
+  <a class="bottom-nav-item" data-page="chat" onclick="showPage('chat')">
+    <span class="bnav-icon">💬</span> Support
+  </a>
+  <a class="bottom-nav-item admin-only hidden" data-page="admin" onclick="showPage('admin')">
+    <span class="bnav-icon">⚙️</span> Admin
+  </a>
+</div>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main>
+
+  <!-- HOME PAGE -->
+  <div id="home-page" class="page active">
+    <div class="hero">
+      <div class="hero-tag">🔥 Fresh &amp; Fast Delivery</div>
+      <h1>Order Your Favorites,<br>Delivered Fresh</h1>
+      <p>Discover hundreds of products from local stores. Quick delivery, great prices.</p>
+      <div class="hero-search">
+        <input type="search" id="hero-search" name="product-search"
+          placeholder="Search products, categories…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <button onclick="loadProducts()">Search</button>
+      </div>
+    </div>
+
+    <div class="cat-scroll" id="cat-scroll">
+      <div class="cat-chip active" onclick="selectCat('All',this)">All</div>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title" id="products-label">All Products</h2>
+      <span class="text-muted text-sm" id="product-count">0 items</span>
+    </div>
+    <div class="product-grid" id="product-grid">
+      <div class="empty-state">
+        <div class="esc-icon">⏳</div>
+        <h3>Loading products…</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDERS PAGE -->
+  <div id="orders-page" class="page">
+    <div class="section-header" style="margin-bottom:22px">
+      <h2 class="section-title">My Orders</h2>
+      <button class="btn btn-outline btn-sm" onclick="loadOrders()">↻ Refresh</button>
+    </div>
+    <div id="orders-list">
+      <div class="empty-state">
+        <div class="esc-icon">📋</div>
+        <h3>No orders yet</h3>
+        <p>Your orders will appear here after you place them.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPORT CHAT PAGE -->
+  <div id="chat-page" class="page">
+    <div class="section-header" style="margin-bottom:18px">
+      <h2 class="section-title">Support Chat</h2>
+    </div>
+    <div class="ai-banner">
+      <span style="font-size:20px">🤖</span>
+      <span>Our AI assistant will reply instantly. A human agent will follow up for complex issues.</span>
+    </div>
+    <div class="chat-layout">
+      <div class="chat-window" style="grid-column:1/-1;">
+        <div class="chat-win-header">
+          <div class="contact-avatar">SS</div>
+          <div>
+            <div class="chat-win-name">SmartStore Support</div>
+            <div class="chat-win-sub">Usually replies within minutes</div>
+          </div>
+          <div class="online-dot"></div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <input class="form-input" type="text" id="chat-input"
+            placeholder="Type your message…"
+            autocomplete="off"
+            onkeydown="if(event.key==='Enter') sendChatMessage()" />
+          <button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PAGE -->
+  <div id="admin-page" class="page">
+    <div class="admin-header">
+      <h2 class="section-title">Admin Panel</h2>
+      <span class="badge badge-primary">Admin</span>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('products',this)">Products</button>
+      <button class="admin-tab"        onclick="switchAdminTab('orders',this)">Orders</button>
+      <button class="admin-tab"        onclick="switchAdminTab('chats',this)">Chats</button>
+    </div>
+
+    <!-- Products Tab -->
+    <div id="admin-products" class="admin-content active">
+      <div class="section-header" style="margin-bottom:18px">
+        <h3 class="section-title">Product Catalog</h3>
+        <button class="btn btn-primary btn-sm" onclick="openAddProduct()">+ Add Product</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Product</th><th>Category</th><th>Price</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="admin-products-body">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:28px">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Orders Tab -->
+    <div id="admin-orders" class="admin-content">
+      <div class="section-header" style="margin-bottom:18px">
+        <h3 class="section-title">All Orders</h3>
+        <button class="btn btn-outline btn-sm" onclick="loadAdminOrders()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th></tr>
+          </thead>
+          <tbody id="admin-orders-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Chats Tab -->
+    <div id="admin-chats" class="admin-content">
+      <div class="chat-layout" style="height:calc(100vh - 280px)">
+        <div class="chat-contacts" id="admin-contacts">
+          <div class="chat-contacts-header">Customers</div>
+          <div style="padding:20px;color:var(--muted);font-size:13px;text-align:center">Loading…</div>
+        </div>
+        <div class="chat-window">
+          <div class="chat-win-header">
+            <div class="contact-avatar" id="admin-chat-avatar">?</div>
+            <div>
+              <div class="chat-win-name" id="admin-chat-name">Select a conversation</div>
+              <div class="chat-win-sub">Customer support</div>
+            </div>
+          </div>
+          <div class="chat-messages" id="admin-chat-messages">
+            <div class="cart-empty" style="padding:40px 0">
+              <div class="cart-empty-icon">💬</div>
+              <p>Select a customer to view their conversation</p>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <input class="form-input" type="text" id="admin-chat-input"
+              placeholder="Reply to customer…"
+              autocomplete="off"
+              onkeydown="if(event.key==='Enter') adminSendChat()" />
+            <button class="btn btn-primary" onclick="adminSendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-page -->
+
+</main>
+
+<!-- ============================================================
+     CART SIDEBAR
+     ============================================================ -->
+<div class="overlay-bg" id="cart-overlay" onclick="toggleCart()"></div>
+<div id="cart-sidebar">
+  <div class="cart-header">
+    <div class="cart-title">🛒 Your Cart</div>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty">
+      <div class="cart-empty-icon">🛒</div>
+      <p>Your cart is empty</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span>Total</span>
+      <span id="cart-total">₱0.00</span>
+    </div>
+    <button class="btn btn-primary w-full" onclick="placeOrder()">Place Order 🎉</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     AUTH MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="auth-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <h2 class="modal-title" id="auth-modal-title">Welcome back</h2>
+    <p class="modal-sub"    id="auth-modal-sub">Sign in to your account</p>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <button id="role-customer" onclick="selectRole('customer')"
+        style="flex:1;padding:10px;border-radius:8px;border:2px solid #E8401C;background:#E8401C;color:#fff;font-weight:600;font-size:14px;">
+        🛒 Customer
+      </button>
+      
+      <button id="role-merchant" onclick="selectRole('merchant')"
+        style="flex:1;padding:10px;border-radius:8px;border:2px solid #e8e6e2;background:transparent;color:#6b6b6b;font-weight:600;font-size:14px;">
+        🏪 Merchant
+      </button>
+    </div>
+
+    <div id="auth-error" class="alert alert-danger" style="display:none"></div>
+
+    <div class="form-group" id="auth-name-group">
+      <label class="form-label">Full Name</label>
+      <input class="form-input" type="text" id="auth-name" placeholder="Juan dela Cruz" autocomplete="name" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email"
+        onkeydown="if(event.key==='Enter') authSubmit()" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="auth-password" placeholder="••••••••" autocomplete="new-password"
+        oninput="checkPasswordStrength(this.value)"
+        onkeydown="if(event.key==='Enter') authSubmit()" />
+      <div id="password-strength" style="display:none;margin-top:6px">
+        <div style="height:4px;border-radius:4px;background:#e8e6e2;overflow:hidden">
+          <div id="strength-bar" style="height:100%;width:0%;transition:all .3s;border-radius:4px"></div>
+        </div>
+        <div id="strength-text" style="font-size:11px;margin-top:4px"></div>
+      </div>
+    </div>
+    
+    <div class="form-group" id="auth-confirm-group" style="display:none">
+      <label class="form-label">Confirm Password</label>
+      <input class="form-input" type="password" id="auth-confirm" placeholder="••••••••" autocomplete="new-password"
+        onkeydown="if(event.key==='Enter') authSubmit()" />
+    </div>
+
+    <button class="btn btn-primary" id="auth-submit-btn" onclick="authSubmit()" style="width:100%;justify-content:center">Login</button>
+
+    <div class="modal-footer">
+      <span id="auth-toggle-text">Don't have an account?</span>
+      <a onclick="toggleAuthMode()" id="auth-toggle-link"> Sign Up</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PRODUCT FORM MODAL (Admin)
+     ============================================================ -->
+<div class="modal-overlay" id="product-form-modal">
+  <div class="modal" style="width:500px">
+    <button class="modal-close" onclick="closeProductModal()">✕</button>
+    <h2 class="modal-title" id="admin-form-title">Add New Product</h2>
+
+    <div style="display:flex;gap:16px;margin-bottom:18px;align-items:center">
+      <div class="img-preview-wrap" id="pf-img-preview"
+           onclick="document.getElementById('pf-img-file').click()" title="Click to upload image">🍽</div>
+      <div style="flex:1">
+        <div class="form-group" style="margin-bottom:8px">
+          <label class="form-label">Image URL / Emoji</label>
+          <input class="form-input" type="text" id="pf-image" placeholder="🍕 or filename.jpg"
+            autocomplete="off"
+            oninput="updateImgPreview(this.value)" />
+        </div>
+        <input type="file" id="pf-img-file" accept="image/*" style="display:none"
+          onchange="handleImageUpload(this.files[0])" />
+        <button class="btn btn-outline btn-xs" onclick="document.getElementById('pf-img-file').click()">
+          📁 Upload Image
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Product Name *</label>
+      <input class="form-input" type="text" id="pf-name" placeholder="e.g. Adobo Platter" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="pf-desc" placeholder="Short description of the product…"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Price (₱) *</label>
+        <input class="form-input" type="number" id="pf-price" placeholder="0.00" min="0" step="0.01" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category *</label>
+        <select class="form-input" id="pf-cat">
+          <option value="">Select category…</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn btn-outline" onclick="closeProductModal()" style="flex:1">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()"        style="flex:2">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     AI ASSISTANT FLOATING WIDGET
+     ============================================================ -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-avatar">🤖</div>
+    <div>
+      <div class="ai-panel-title">SmartStore AI</div>
+      <div class="ai-panel-sub">Powered by Claude · Always here to help</div>
+    </div>
+    <button class="ai-close-btn" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="ai-messages"></div>
+  <div class="ai-quick-btns" id="ai-quick-btns" style="display:none">
+    <button class="ai-quick-btn" onclick="aiQuick('What\'s on the menu today?')">📋 Menu</button>
+    <button class="ai-quick-btn" onclick="aiQuick('What are your bestsellers?')">⭐ Bestsellers</button>
+    <button class="ai-quick-btn" onclick="aiQuick('How long does delivery take?')">🚀 Delivery time</button>
+  </div>
+  <div class="ai-input-area">
+    <input class="form-input" type="text" id="ai-input"
+      placeholder="Ask me anything…"
+      autocomplete="off"
+      onkeydown="if(event.key==='Enter') sendAIMessage()" />
+    <button class="ai-send-btn btn" onclick="sendAIMessage()">Send</button>
+  </div>
+</div>
+
+<button class="ai-fab" onclick="toggleAI()" title="AI Assistant">🤖</button>
+
+<!-- ============================================================
+     ACCOUNT SETUP MODAL
+     ============================================================ -->
+     <div class="modal-overlay" id="setup-modal-overlay">
+      <div class="modal" style="width:400px;max-width:95vw">
+        <button class="modal-close" onclick="closeSetupModal()">✕</button>
+        <h2 class="modal-title" id="setup-modal-title">Delivery Address</h2>
+        <p class="modal-sub" id="setup-modal-sub">Enter your delivery address</p>
+    
+        <!-- ADDRESS FORM -->
+        <div id="setup-form-address">
+          <div class="form-group">
+            <label class="form-label">Street / Barangay</label>
+            <input class="form-input" type="text" id="setup-street" placeholder="e.g. 123 Mango Ave, Brgy. Lahug" autocomplete="street-address" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input class="form-input" type="text" id="setup-city" placeholder="e.g. Cebu City" autocomplete="address-level2" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Province</label>
+              <input class="form-input" type="text" id="setup-province" placeholder="e.g. Cebu" autocomplete="address-level1" />
+            </div>
+          </div>
+        </div>
+    
+        <!-- PAYMENT FORM -->
+        <div id="setup-form-payment" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Payment Type</label>
+            <select class="form-input" id="setup-pay-type" onchange="togglePayFields()">
+              <option value="">Select type…</option>
+              <option value="GCash">GCash</option>
+              <option value="Maya">Maya</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="Cash on Delivery">Cash on Delivery</option>
+            </select>
+          </div>
+          <div id="setup-pay-number-group" class="form-group" style="display:none">
+            <label class="form-label" id="setup-pay-number-label">Account Number</label>
+            <input class="form-input" type="text" id="setup-pay-number" placeholder="e.g. 09XX XXX XXXX" autocomplete="off" maxlength="19" />
+          </div>
+        </div>
+    
+        <!-- CONTACT FORM -->
+        <div id="setup-form-contact" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input class="form-input" type="tel" id="setup-phone" placeholder="e.g. +63 912 345 6789" autocomplete="tel" maxlength="16" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Alternate Phone <span style="color:#bbb;font-weight:400;font-size:11px">(optional)</span></label>
+            <input class="form-input" type="tel" id="setup-phone-alt" placeholder="e.g. +63 917 000 0000" autocomplete="tel" maxlength="16" />
+          </div>
+        </div>
+    
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn btn-outline" onclick="closeSetupModal()" style="flex:1">Cancel</button>
+          <button class="btn btn-primary" onclick="saveSetupModal()" style="flex:2" id="setup-save-btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+<!-- ============================================================
+     ORDER CONFIRMATION MODAL
+     ============================================================ -->
+     <div class="modal-overlay" id="confirm-order-overlay">
+      <div class="modal" style="width:460px;max-width:95vw">
+        <button class="modal-close" onclick="closeConfirmOrder()">✕</button>
+        <h2 class="modal-title">Confirm Your Order</h2>
+        <p class="modal-sub">Please review your order details before placing</p>
+    
+        <!-- Cart Items Summary -->
+        <div style="background:#f8f7f5;border-radius:10px;padding:14px;margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Order Summary</div>
+          <div id="confirm-items"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1.5px solid #e8e6e2;">
+            <span style="font-weight:600;font-size:14px;">Total</span>
+            <span id="confirm-total" style="font-weight:700;font-size:16px;color:#E8401C;"></span>
+          </div>
+        </div>
+    
+        <!-- Delivery Info -->
+        <!-- Delivery Info -->
+<div style="background:#f8f7f5;border-radius:10px;padding:14px;margin-bottom:16px;">
+  <div style="font-size:11px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Delivery Details</div>
+  
+  <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+    <span style="font-size:18px;">📍</span>
+    <div style="flex:1;">
+      <div style="font-size:12px;color:#6b6b6b;">Delivery Address</div>
+      <div id="confirm-address" style="font-size:14px;font-weight:500;"></div>
+    </div>
+    <button onclick="editFromConfirm('address')" style="font-size:12px;color:#E8401C;background:none;border:none;cursor:pointer;font-weight:600;white-space:nowrap;">Edit</button>
+  </div>
+
+  <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+    <span style="font-size:18px;">💳</span>
+    <div style="flex:1;">
+      <div style="font-size:12px;color:#6b6b6b;">Payment Method</div>
+      <div id="confirm-payment" style="font-size:14px;font-weight:500;"></div>
+    </div>
+    <button onclick="editFromConfirm('payment')" style="font-size:12px;color:#E8401C;background:none;border:none;cursor:pointer;font-weight:600;white-space:nowrap;">Edit</button>
+  </div>
+
+  <div style="display:flex;align-items:flex-start;gap:10px;">
+    <span style="font-size:18px;">👤</span>
+    <div style="flex:1;">
+      <div style="font-size:12px;color:#6b6b6b;">Contact</div>
+      <div id="confirm-contact" style="font-size:14px;font-weight:500;"></div>
+    </div>
+    <button onclick="editFromConfirm('contact')" style="font-size:12px;color:#E8401C;background:none;border:none;cursor:pointer;font-weight:600;white-space:nowrap;">Edit</button>
+  </div>
+</div>
+    
+        <!-- Warning if missing info -->
+        <div id="confirm-warning" style="display:none;background:#faeeda;border:1px solid #f0c070;border-radius:8px;padding:10px 14px;font-size:13px;color:#854F0B;margin-bottom:16px;">
+          ⚠️ Please complete your <span id="confirm-warning-text"></span> before placing an order.
+          <a onclick="closeConfirmOrder()" style="color:#E8401C;font-weight:600;cursor:pointer;"> Update now</a>
+        </div>
+    
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <button class="btn btn-outline" onclick="closeConfirmOrder()" style="flex:1">Cancel</button>
+          <button class="btn btn-primary" id="confirm-order-btn" onclick="confirmPlaceOrder()" style="flex:2;justify-content:center;">
+            Place Order 🎉
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+<!-- ============================================================
+     TOAST
+     ============================================================ -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script src="app.js"></script>
+
+<script>
+  // Wire up auth-error visibility via textContent setter
+  const authErrEl = document.getElementById('auth-error');
+  const _origDesc = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent');
+  Object.defineProperty(authErrEl, 'textContent', {
+    set(v) {
+      _origDesc.set.call(this, v);
+      this.style.display = v ? 'block' : 'none';
+    },
+    get() { return _origDesc.get.call(this); }
+  });
+
+  
+</script>
+</body>
+</html>
