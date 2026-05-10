@@ -115,8 +115,7 @@ function handleMe(): void {
 function getProducts(): void {
     $cat = $_GET['category'] ?? '';
     $q   = $_GET['search']   ?? '';
-
-    // Only filter by merchant when in admin view and user is logged in as admin
+    
     $isMerchant = isset($_SESSION['role'])
                && $_SESSION['role'] === 'admin'
                && isset($_GET['admin_view'])
@@ -281,7 +280,6 @@ function getOrders(): void {
     jsonResponse(['orders' => $stmt->fetchAll()]);
 }
 
-// Replace getAllOrders() with this:
 function getAllOrders(): void {
     requireAdmin();
     $stmt = db()->prepare("
@@ -308,7 +306,6 @@ function updateOrderStatus(array $b): void {
     $valid  = ['pending', 'preparing', 'completed', 'cancelled'];
     if (!$id || !in_array($status, $valid)) jsonResponse(['error' => 'Invalid data'], 400);
 
-    // Check that this order contains at least one of this merchant's products
     $check = db()->prepare("
         SELECT COUNT(*) FROM order_items oi
         JOIN products p ON oi.product_id = p.id
