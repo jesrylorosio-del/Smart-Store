@@ -3,8 +3,8 @@
 // --- DATABASE ---
 define('DB_HOST', 'sql307.infinityfree.com');
 define('DB_NAME', 'if0_41809991_smartstore');
-define('DB_USER', 'if0_41809991');       // change to your MySQL username
-define('DB_PASS', '8QFZ16j6Ud3');           // change to your MySQL password
+define('DB_USER', 'if0_41809991');      
+define('DB_PASS', '**********');          
 define('DB_CHARSET', 'utf8mb4');
 
 // --- APP SETTINGS ---
