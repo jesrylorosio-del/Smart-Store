@@ -122,7 +122,7 @@ function clearUser() {
 // ============================================================
 
 let authMode = 'login';
-let selectedRole = 'customer'; // default
+let selectedRole = 'customer'; 
 
 function selectRole(role) {
   selectedRole = role;
@@ -241,7 +241,6 @@ function toggleProfileDropdown() {
   if (dropdown) dropdown.classList.toggle('open');
 }
 
-// Close dropdown when clicking outside
 document.addEventListener('click', (e) => {
   const wrap     = document.getElementById('profile-avatar-wrap');
   const dropdown = document.getElementById('profile-dropdown');
@@ -413,7 +412,6 @@ async function placeOrder() {
 function showConfirmOrder() {
   const saved = loadSetupData();
 
-  // Populate cart items
   const itemsEl = document.getElementById('confirm-items');
   itemsEl.innerHTML = App.cart.map(item => `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -422,11 +420,10 @@ function showConfirmOrder() {
     </div>
   `).join('');
 
-  // Populate total
   const total = App.cart.reduce((s, c) => s + parseFloat(c.price) * c.qty, 0);
   document.getElementById('confirm-total').textContent = '₱' + total.toFixed(2);
 
-  // Populate delivery info
+
   const address = saved.address
     ? [saved.address.street, saved.address.city, saved.address.province].filter(Boolean).join(', ')
     : null;
@@ -439,7 +436,6 @@ function showConfirmOrder() {
   document.getElementById('confirm-payment').textContent = payment || '—';
   document.getElementById('confirm-contact').textContent = contact || '—';
 
-  // Show warning if missing info
   const missing = [];
   if (!address) missing.push('delivery address');
   if (!payment) missing.push('payment method');
@@ -470,13 +466,11 @@ function editFromConfirm(type) {
   closeConfirmOrder();
   openSetupModal(type);
 
-  // Re-open confirm modal after saving
   const originalSave = window._originalSaveSetup;
   const saveBtn = document.getElementById('setup-save-btn');
   
   saveBtn.onclick = function() {
     saveSetupModal();
-    // Re-open confirm after a short delay
     setTimeout(() => {
       showConfirmOrder();
     }, 300);
@@ -567,13 +561,11 @@ async function loadChat() {
   const r = await api('get_chat');
   renderChatMessages(r.messages || [], 'chat-messages');
 
-  // Auto-refresh every 5 seconds
   setInterval(async () => {
     const r = await api('get_chat');
     renderChatMessages(r.messages || [], 'chat-messages');
   }, 5000);
 
-  // Auto-reply checker every 2 minutes
   setInterval(async () => {
     await api('check_pending_replies');
   }, 2 * 60 * 1000);
@@ -613,7 +605,6 @@ function chatWithSeller(productId, merchantId, productName) {
   if (!App.user) { showAuth('login'); toast('Please login to chat with seller'); return; }
   App.chatMerchantId = merchantId;
   showPage('chat');
-  // Pre-fill a message
   const inp = document.getElementById('chat-input');
   inp.value = `Hi! I have a question about "${productName}"`;
   inp.focus();
@@ -963,7 +954,7 @@ function openSetupModal(type) {
   document.getElementById('setup-modal-sub').textContent   = titles[type][1];
   document.getElementById('setup-form-' + type).style.display = 'block';
 
-  // Pre-fill if already saved
+
   const saved = loadSetupData();
 
   if (type === 'address' && saved.address) {
@@ -1042,7 +1033,6 @@ function saveSetupModal() {
   toast('Saved successfully ✓');
 }
 
-// localStorage helpers — keyed per user so data doesn't mix between accounts
 function setupKey() {
   return 'smartstore_setup_' + (App.user ? App.user.id : 'guest');
 }
@@ -1053,7 +1043,6 @@ function saveSetupData(data) {
   localStorage.setItem(setupKey(), JSON.stringify(data));
 }
 
-// Cart persistence
 function cartKey() {
   return 'smartstore_cart_' + (App.user ? App.user.id : 'guest');
 }
@@ -1064,7 +1053,6 @@ function loadCart() {
   try { return JSON.parse(localStorage.getItem(cartKey()) || '[]'); } catch { return []; }
 }
 
-// Restore saved info into the dropdown UI after login
 function restoreSetupUI() {
   const saved = loadSetupData();
 
@@ -1113,7 +1101,6 @@ function debounce(fn, ms) {
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
 
-// Close modals on Escape key
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('cart-sidebar').classList.contains('open'))         toggleCart();
